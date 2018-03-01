@@ -41,6 +41,6 @@ export const updateOrganizationToUser = reaction(async (action, store) => {
     updated = unset(user, `organizations.${organizationId}`)
   }
 
-  await userCrud.update(updated)
   store.data.users.update(updated)
+  await userCrud.update(updated)
 })

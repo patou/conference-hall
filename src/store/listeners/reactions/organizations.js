@@ -9,18 +9,22 @@ import userCrud from 'firebase/user'
 // eslint-disable-next-line import/prefer-default-export
 export const createOrganization = reaction(async (action, store, { form }) => {
   const createForm = form('organization-create')
-  const organization = createForm.getFormValues()
+  const organizationFormValues = createForm.getFormValues()
   // get user id
   const { uid } = store.auth.get()
   // create organization into database
   const { id } = await createForm.asyncSubmit(
     organizationCrud.create,
-    { ...organization, owner: uid },
+    { ...organizationFormValues, owner: uid },
   )
 
   // FIXME: https://github.com/bpetetot/conference-hall/issues/167
   const ref = await organizationCrud.read(id)
-  organizationCrud.update({ id: ref.id, ...ref.data() })
+  const organization = { id: ref.id, ...ref.data() }
+  organizationCrud.update(organization)
+
+  // Add organization in store
+  store.data.organizations.add(organization)
 
   // Add organization id in owner organizations property
   store.dispatch({ type: '@@ui/ADD_ORGANIZATION_TO_USER', payload: { uid, organizationId: ref.id } })
